@@ -4,8 +4,8 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
-import com.alurachallenge.aluraflix.entities.Video;
-import com.alurachallenge.aluraflix.repositories.VideoRepository;
+import com.alurachallenge.aluraflix.entities.Categoria;
+import com.alurachallenge.aluraflix.repositories.CategoriaRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -24,30 +24,30 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
-@RequestMapping(value = "/videos")
-public class VideoController {
+@RequestMapping(value = "/categorias")
+public class CategoriaController {
 	
 	@Autowired
-	private VideoRepository repository;
+	private CategoriaRepository repository;
 	@GetMapping
-	public ResponseEntity<List<Video>> findAll() {
-	    List<Video> result = repository.findAll();
+	public ResponseEntity<List<Categoria>> findAll() {
+	    List<Categoria> result = repository.findAll();
 	    return ResponseEntity.ok(result);
 	}
 	
 	@GetMapping(value = "/page")
 	
-	public ResponseEntity<Page<Video>> findAll(Pageable pageable ) {
-	    Page<Video> result = repository.findAll(pageable);
+	public ResponseEntity<Page<Categoria>> findAll(Pageable pageable ) {
+	    Page<Categoria> result = repository.findAll(pageable);
 	    return ResponseEntity.ok(result);
 	}
 	
 	
     @GetMapping("/{id}")
-    public ResponseEntity<Video> getById(@PathVariable long id) {
-        Optional<Video> video = repository.findById(id);
-        if (video.isPresent()) {
-            return new ResponseEntity<>(new Video(video.get()), HttpStatus.OK);
+    public ResponseEntity<Categoria> getById(@PathVariable long id) {
+        Optional<Categoria> categoria = repository.findById(id);
+        if (categoria.isPresent()) {
+            return new ResponseEntity<>(new Categoria(categoria.get()), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -55,26 +55,26 @@ public class VideoController {
     
 
 	@PostMapping()
-	public ResponseEntity<Video> save(@RequestBody Video video, UriComponentsBuilder uriBuilder) {
-		repository.save(video);
-		URI uri = uriBuilder.path("/videos/{id}").buildAndExpand(video.getId()).toUri();
-		return ResponseEntity.created(uri).body(new Video(video));
+	public ResponseEntity<Categoria> save(@RequestBody Categoria categoria, UriComponentsBuilder uriBuilder) {
+		repository.save(categoria);
+		URI uri = uriBuilder.path("/categorias/{id}").buildAndExpand(categoria.getId()).toUri();
+		return ResponseEntity.created(uri).body(new Categoria(categoria));
 
 	} 
 	
 	@PutMapping("/{id}")
 	@Transactional
-	public ResponseEntity<Video> update(@PathVariable Long id, @RequestBody Video video) {
-		video.setId(id);
-		repository.save(video);
-        return ResponseEntity.ok(new Video(video));        
+	public ResponseEntity<Categoria> update(@PathVariable Long id, @RequestBody Categoria categoria) {
+		categoria.setId(id);
+		repository.save(categoria);
+        return ResponseEntity.ok(new Categoria(categoria));        
 	}
 	
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> deleteById(@PathVariable Long id) {
-        Optional<Video> video = repository.findById(id);
-        if (video.isPresent()) {
-            return new ResponseEntity<>(new Video(video.get()), HttpStatus.OK);
+        Optional<Categoria> categoria = repository.findById(id);
+        if (categoria.isPresent()) {
+            return new ResponseEntity<>(new Categoria(categoria.get()), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
