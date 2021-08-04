@@ -4,11 +4,13 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
+import com.alurachallenge.aluraflix.dtos.VideoDto;
 import com.alurachallenge.aluraflix.entities.Video;
 import com.alurachallenge.aluraflix.repositories.VideoRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,65 +26,68 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
+
 @RequestMapping(value = "/videos")
 public class VideoController {
 	
 	@Autowired
 	private VideoRepository repository;
 	@GetMapping
-	public ResponseEntity<List<Video>> findAll() {
-	    List<Video> result = repository.findAll();
+	public ResponseEntity<List<VideoDto>> findAll() {
+	    List<Video> videos = repository.findAll();
+		List<VideoDto> result = VideoDto.converter(videos);
 	    return ResponseEntity.ok(result);
 	}
 	
 	@GetMapping(value = "/page")
-	
-	public ResponseEntity<Page<Video>> findAll(Pageable pageable ) {
-	    Page<Video> result = repository.findAll(pageable);
-	    return ResponseEntity.ok(result);
-	}
-	
+	public PageImpl<VideoDto> findAll(Pageable pageable ) {
+			Page<Video> video = repository.findAll(pageable); 
+			return new PageImpl<VideoDto>(VideoDto.converter(video.getContent()), pageable, video.getTotalElements());
+		}
 	
     @GetMapping("/{id}")
-    public ResponseEntity<Video> getById(@PathVariable long id) {
-        Optional<Video> video = repository.findById(id);
+    public ResponseEntity<VideoDto> getById(@PathVariable long id) {
+        
+		Optional<Video> video = repository.findById(id);
         if (video.isPresent()) {
-            return new ResponseEntity<>(new Video(video.get()), HttpStatus.OK);
-        } else {
+			//System.out.println("OBJETO DENTRO: "+ video.get().getTitulo());
+			
+			VideoDto videoDto = new VideoDto(video.get());
+			System.out.println("OBJETO DTO: "+ videoDto.getTitulo());
+
+            return new ResponseEntity<>(videoDto, HttpStatus.OK);
+       } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
-    
 
 	@PostMapping()
-	public ResponseEntity<Video> save(@RequestBody Video video, UriComponentsBuilder uriBuilder) {
+	public ResponseEntity<VideoDto> save(@RequestBody Video video, UriComponentsBuilder uriBuilder) {	
 		repository.save(video);
+		//VideoDto videoDto = new VideoDto(video);
 		URI uri = uriBuilder.path("/videos/{id}").buildAndExpand(video.getId()).toUri();
-		return ResponseEntity.created(uri).body(new Video(video));
+		return ResponseEntity.created(uri).body(new VideoDto(video));
 
 	} 
 	
 	@PutMapping("/{id}")
 	@Transactional
-	public ResponseEntity<Video> update(@PathVariable Long id, @RequestBody Video video) {
+	public ResponseEntity<VideoDto> update(@PathVariable Long id, @RequestBody Video video) {
 		video.setId(id);
 		repository.save(video);
-        return ResponseEntity.ok(new Video(video));        
+        return ResponseEntity.ok(new VideoDto(video));        
 	}
 	
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> deleteById(@PathVariable Long id) {
         Optional<Video> video = repository.findById(id);
-        if (video.isPresent()) {
-            return new ResponseEntity<>(new Video(video.get()), HttpStatus.OK);
-        } else {
+		if (video.isPresent()) {
+			VideoDto videoDto = new VideoDto(video.orElse(null));
+            return new ResponseEntity<>(videoDto, HttpStatus.OK);
+       } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 	}
-	
-	
-	
-
 }
 
 

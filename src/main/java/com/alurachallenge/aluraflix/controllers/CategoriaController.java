@@ -4,11 +4,13 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
+import com.alurachallenge.aluraflix.dtos.CategoriaDto;
 import com.alurachallenge.aluraflix.entities.Categoria;
 import com.alurachallenge.aluraflix.repositories.CategoriaRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,57 +32,57 @@ public class CategoriaController {
 	@Autowired
 	private CategoriaRepository repository;
 	@GetMapping
-	public ResponseEntity<List<Categoria>> findAll() {
-	    List<Categoria> result = repository.findAll();
+	public ResponseEntity<List<CategoriaDto>> findAll() {
+	    List<Categoria> categorias = repository.findAll();
+		List<CategoriaDto> result = CategoriaDto.converter(categorias);
 	    return ResponseEntity.ok(result);
 	}
 	
 	@GetMapping(value = "/page")
-	
-	public ResponseEntity<Page<Categoria>> findAll(Pageable pageable ) {
-	    Page<Categoria> result = repository.findAll(pageable);
-	    return ResponseEntity.ok(result);
-	}
+	public PageImpl<CategoriaDto> findAll(Pageable pageable ) {
+			Page<Categoria> categoria = repository.findAll(pageable); 
+			return new PageImpl<CategoriaDto>(CategoriaDto.converter(categoria.getContent()), pageable, categoria.getTotalElements());
+		}
 	
 	
     @GetMapping("/{id}")
-    public ResponseEntity<Categoria> getById(@PathVariable long id) {
-        Optional<Categoria> categoria = repository.findById(id);
+    public ResponseEntity<CategoriaDto> getById(@PathVariable long id) {
+		Optional<Categoria> categoria = repository.findById(id);
         if (categoria.isPresent()) {
-            return new ResponseEntity<>(new Categoria(categoria.get()), HttpStatus.OK);
-        } else {
+			CategoriaDto categoriaDto = new CategoriaDto(categoria.orElse(null));
+            return new ResponseEntity<>(categoriaDto, HttpStatus.OK);
+       } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
     
 
 	@PostMapping()
-	public ResponseEntity<Categoria> save(@RequestBody Categoria categoria, UriComponentsBuilder uriBuilder) {
+	public ResponseEntity<CategoriaDto> save(@RequestBody Categoria categoria, UriComponentsBuilder uriBuilder) {	
 		repository.save(categoria);
-		URI uri = uriBuilder.path("/categorias/{id}").buildAndExpand(categoria.getId()).toUri();
-		return ResponseEntity.created(uri).body(new Categoria(categoria));
+		URI uri = uriBuilder.path("/categorias/{id}").buildAndExpand(categoria.getIdCategoria()).toUri();
+		return ResponseEntity.created(uri).body(new CategoriaDto(categoria));
 
 	} 
 	
 	@PutMapping("/{id}")
 	@Transactional
-	public ResponseEntity<Categoria> update(@PathVariable Long id, @RequestBody Categoria categoria) {
-		categoria.setId(id);
+	public ResponseEntity<CategoriaDto> update(@PathVariable Long id, @RequestBody Categoria categoria) {
+		categoria.setIdCategoria(id);
 		repository.save(categoria);
-        return ResponseEntity.ok(new Categoria(categoria));        
+        return ResponseEntity.ok(new CategoriaDto(categoria));        
 	}
 	
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> deleteById(@PathVariable Long id) {
         Optional<Categoria> categoria = repository.findById(id);
-        if (categoria.isPresent()) {
-            return new ResponseEntity<>(new Categoria(categoria.get()), HttpStatus.OK);
-        } else {
+		if (categoria.isPresent()) {
+			CategoriaDto categoriaDto = new CategoriaDto(categoria.orElse(null));
+            return new ResponseEntity<>(categoriaDto, HttpStatus.OK);
+       } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 	}
-	
-	
 	
 
 }

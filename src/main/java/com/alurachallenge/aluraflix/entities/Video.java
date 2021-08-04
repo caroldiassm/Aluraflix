@@ -1,20 +1,31 @@
 package com.alurachallenge.aluraflix.entities;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import com.sun.istack.NotNull;
 
+import lombok.Getter;
+import lombok.Setter;
+
 @Entity
 @Table(name = "videos")
+@Getter @Setter
 public class Video {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+	@JoinColumn(name = "idCategoria" , insertable = true, updatable = true)
+	private Categoria categoria;
 	@NotNull
 	private String titulo;
 	@NotNull
@@ -31,47 +42,16 @@ public class Video {
         this.descricao = video.getDescricao();
         this.url = video.getUrl();
         this.id = video.getId();
+		this.categoria = video.getCategoria();
     }
 
-	public Video(Long id, String titulo, String descricao,String url) {
+	public Video(Long id, String titulo, String descricao,String url, Categoria categoria) {
 		super();
 		this.id = id;
 		this.titulo = titulo;	
 		this.descricao = descricao;
 		this.url = url;
+		this.categoria = categoria;
 	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public String getTitulo() {
-		return titulo;
-	}
-
-	public void setTitulo(String titulo) {
-		this.titulo = titulo;
-	}
-
-	public String getDescricao() {
-		return descricao;
-	}
-
-	public void setDescricao(String descricao) {
-		this.descricao = descricao;
-	};
-	
-	public String getUrl() {
-		return url;
-	}
-
-	public void setUrl(String url) {
-		this.url = url;
-	};
-	
 	
 }
