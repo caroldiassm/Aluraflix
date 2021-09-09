@@ -10,14 +10,18 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sun.istack.NotNull;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "videos")
 @Getter @Setter
+@NoArgsConstructor
 public class Video {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,10 +36,6 @@ public class Video {
 	private String descricao;
 	@NotNull
 	private String url;
-	
-	Video(){
-		
-	}
 	
     public Video(Video video) {
         this.titulo = video.getTitulo();

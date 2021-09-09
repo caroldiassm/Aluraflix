@@ -1,5 +1,6 @@
 package com.alurachallenge.aluraflix.dtos;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,7 +23,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CategoriaDto {
+public class CategoriaDto implements Serializable{
+	private static final long serialVersionUID = 1L;
 
     private Long idCategoria;
 	

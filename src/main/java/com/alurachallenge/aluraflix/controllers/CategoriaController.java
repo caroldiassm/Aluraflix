@@ -1,16 +1,18 @@
 package com.alurachallenge.aluraflix.controllers;
 
 import java.net.URI;
-import java.util.List;
 import java.util.Optional;
 
 import com.alurachallenge.aluraflix.dtos.CategoriaDto;
+import com.alurachallenge.aluraflix.dtos.VideoDto;
 import com.alurachallenge.aluraflix.entities.Categoria;
+import com.alurachallenge.aluraflix.entities.Video;
 import com.alurachallenge.aluraflix.repositories.CategoriaRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -31,15 +34,18 @@ public class CategoriaController {
 	
 	@Autowired
 	private CategoriaRepository repository;
-	@GetMapping
+/*	@GetMapping
 	public ResponseEntity<List<CategoriaDto>> findAll() {
-	    List<Categoria> categorias = repository.findAll();
+		List<Categoria> categorias = repository.findAll();
 		List<CategoriaDto> result = CategoriaDto.converter(categorias);
 	    return ResponseEntity.ok(result);
 	}
+*/
 	
-	@GetMapping(value = "/page")
-	public PageImpl<CategoriaDto> findAll(Pageable pageable ) {
+	@GetMapping()
+	public PageImpl<CategoriaDto> findAll(@RequestParam(required = false, defaultValue = "0", name = "page") int page, 
+					@RequestParam(required = false, defaultValue = "5", name = "size") int size) {
+			Pageable pageable = PageRequest.of(page, size);
 			Page<Categoria> categoria = repository.findAll(pageable); 
 			return new PageImpl<CategoriaDto>(CategoriaDto.converter(categoria.getContent()), pageable, categoria.getTotalElements());
 		}
@@ -83,6 +89,19 @@ public class CategoriaController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 	}
+
+	@GetMapping("/{id}/videos")
+    public PageImpl<VideoDto> findVideosByCategoryId(@PathVariable Long id, 
+			@RequestParam(required = false, defaultValue = "0", name = "page") int page, 
+			@RequestParam(required = false, defaultValue = "5", name = "size") int size){
+
+		Pageable pageable = PageRequest.of(page, size);
+		
+        Page<Video> videos = repository.findVideosByCategoryId(id, pageable);
+		return new PageImpl<VideoDto>(VideoDto.converter(videos.getContent()), pageable, videos.getTotalElements());
+        //return Objects.nonNull(videoDtos) ? ResponseEntity.status(HttpStatus.OK).body(videoDtos) : ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+
+    }
 	
 
 }
